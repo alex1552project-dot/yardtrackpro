@@ -1,0 +1,9 @@
+{
+  "name": "yardtrackpro-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for YardTrackPro",
+  "dependencies": {
+    "square": "^35.0.0",
+    "mongodb": "^6.3.0"
+  }
+}
