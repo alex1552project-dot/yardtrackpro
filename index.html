@@ -638,7 +638,7 @@
         async function initializeSquare() {
             if (squareCard) return;
             try {
-                const payments = Square.payments('sq0idb-QAzFEmXgssJhWXlroCT99Q', 'LPB7SAE3PG6A0');
+                const payments = Square.payments('sandbox-sq0idb-QAzFEmXgssJhWXlroCT99Q', 'LPB7SAE3PG6A0');
                 squareCard = await payments.card();
                 await squareCard.attach('#card-container');
             } catch (err) { console.error('Square init error:', err); }
