@@ -113,11 +113,12 @@
         .payment-option.selected .payment-check svg { opacity: 1; }
         .card-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; min-height: 50px; margin-top: 16px; }
         /* Area Calculator Styles */
-        .calculator-section { background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .calculator-section { background: var(--bg-secondary); border-radius: 12px; padding: 16px; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
         .calc-input-group { display: flex; flex-direction: column; }
-        .calc-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-        .calc-input-group input { padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 16px; font-family: 'JetBrains Mono', monospace; text-align: center; }
+        .calc-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; text-align: center; }
+        .calc-input-group input { width: 100%; padding: 12px 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 18px; font-family: 'JetBrains Mono', monospace; text-align: center; -webkit-appearance: none; -moz-appearance: textfield; }
+        .calc-input-group input::placeholder { color: var(--text-muted); font-size: 16px; }
         .calc-input-group input:focus { outline: none; border-color: var(--accent); }
         .calc-btn { width: 100%; padding: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 10px; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
         .calc-btn:active { background: var(--accent); color: var(--bg-primary); }
@@ -125,6 +126,7 @@
         .calc-result.show { display: block; }
         .calc-result-label { font-size: 12px; color: rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
         .calc-result-value { font-size: 28px; font-weight: 700; color: var(--bg-primary); font-family: 'JetBrains Mono', monospace; }
+        .calc-result-tons { font-size: 14px; color: rgba(0,0,0,0.7); margin-top: 4px; }
         .calc-result-action { margin-top: 10px; font-size: 13px; color: rgba(0,0,0,0.7); }
         .camera-screen { padding: 0; background: #000; position: relative; }
         .camera-header { position: absolute; top: 0; left: 0; right: 0; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); }
@@ -246,26 +248,27 @@
             <div class="sales-form">
                 <!-- Area Calculator -->
                 <div class="form-section">
-                    <div class="form-section-title">📐 Area Calculator</div>
+                    <div class="form-section-title">📐 Area Calculator (optional)</div>
                     <div class="calculator-section">
                         <div class="calc-grid">
                             <div class="calc-input-group">
                                 <label>Length (ft)</label>
-                                <input type="number" id="calcLength" placeholder="0" min="0" step="0.5">
+                                <input type="number" id="calcLength" placeholder="20" min="0" step="0.5" inputmode="decimal">
                             </div>
                             <div class="calc-input-group">
                                 <label>Width (ft)</label>
-                                <input type="number" id="calcWidth" placeholder="0" min="0" step="0.5">
+                                <input type="number" id="calcWidth" placeholder="10" min="0" step="0.5" inputmode="decimal">
                             </div>
                             <div class="calc-input-group">
                                 <label>Depth (in)</label>
-                                <input type="number" id="calcDepth" placeholder="0" min="0" step="0.5">
+                                <input type="number" id="calcDepth" placeholder="3" min="0" step="0.5" inputmode="decimal">
                             </div>
                         </div>
-                        <button class="calc-btn" onclick="calculateYards()">Calculate</button>
+                        <button type="button" class="calc-btn" onclick="calculateYards()">Calculate</button>
                         <div class="calc-result" id="calcResult">
                             <div class="calc-result-label">You need approximately</div>
                             <div class="calc-result-value"><span id="calcYards">0</span> cubic yards</div>
+                            <div class="calc-result-tons" id="calcTons"></div>
                             <div class="calc-result-action">✓ Quantity updated below</div>
                         </div>
                     </div>
@@ -543,8 +546,7 @@
                 return;
             }
             
-            // Calculate cubic yards: (L × W × D in inches) / 46656 cubic inches per cubic yard
-            // Or: (L × W in sqft) × (D in inches / 12) / 27 cubic feet per cubic yard
+            // Calculate cubic yards: (L × W in sqft) × (D in inches / 12) / 27 cubic feet per cubic yard
             const depthFeet = depthInches / 12;
             const cubicFeet = length * width * depthFeet;
             const cubicYards = cubicFeet / 27;
@@ -553,6 +555,19 @@
             const roundedYards = Math.ceil(cubicYards * 2) / 2;
             
             document.getElementById('calcYards').textContent = roundedYards.toFixed(1);
+            
+            // Show tons if material is selected
+            const materialSelect = document.getElementById('saleMaterial');
+            const calcTonsEl = document.getElementById('calcTons');
+            if (materialSelect.value) {
+                const option = materialSelect.options[materialSelect.selectedIndex];
+                const weightPerYard = parseFloat(option.dataset.weight) || 1.4;
+                const tons = roundedYards * weightPerYard;
+                calcTonsEl.textContent = '≈ ' + tons.toFixed(2) + ' tons of ' + option.text.split(' - ')[0];
+            } else {
+                calcTonsEl.textContent = 'Select a material below to see tonnage';
+            }
+            
             document.getElementById('calcResult').classList.add('show');
             
             // Update the quantity field
@@ -669,6 +684,13 @@
             document.getElementById('priceTax').textContent = '$' + salesTax.toFixed(2);
             document.getElementById('priceTotal').textContent = '$' + total.toFixed(2);
             priceDisplay.style.display = 'block';
+
+            // Also update calculator tons display if visible
+            const calcResult = document.getElementById('calcResult');
+            const calcTonsEl = document.getElementById('calcTons');
+            if (calcResult.classList.contains('show') && calcTonsEl) {
+                calcTonsEl.textContent = '≈ ' + tons.toFixed(2) + ' tons of ' + materialName;
+            }
 
             currentSale = { materialId: materialSelect.value, material: materialName, quantity, tons, pricePerTon, subtotal, serviceFee, salesTax, total };
             validateSaleForm();
