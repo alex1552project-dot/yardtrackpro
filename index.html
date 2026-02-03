@@ -653,13 +653,27 @@
 
         async function processTicketPhoto() {
             try {
+                // Add timeout for the API call
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
                 const response = await fetch('/.netlify/functions/extract-ticket', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: capturedImageData })
+                    body: JSON.stringify({ image: capturedImageData }),
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status}`);
+                }
 
                 const result = await response.json();
+                console.log('API Result:', result);
 
                 if (result.success && result.data) {
                     // Determine quality of extraction
@@ -672,7 +686,19 @@
                 }
             } catch (err) {
                 console.error('OCR Error:', err);
-                showPhotoResult(null, { status: 'failed', message: "Couldn't read this ticket. Try again with better lighting or get closer." });
+                
+                let message = "Couldn't read this ticket. Try again with better lighting or get closer.";
+                if (err.name === 'AbortError') {
+                    message = "Request timed out. Check your connection and try again.";
+                } else if (err.message.includes('Server error')) {
+                    message = "Server error. Please try again in a moment.";
+                }
+                
+                showPhotoResult(null, { 
+                    status: 'failed', 
+                    message: message,
+                    icon: '❌'
+                });
             }
         }
 
