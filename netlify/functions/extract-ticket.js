@@ -1,5 +1,83 @@
 // netlify/functions/extract-ticket.js
 // YardTrackPro - Real OCR using Claude Vision API
+// Includes AI matching to Texas Got Rocks productIds
+
+// Valid product IDs from Texas Got Rocks inventory
+const VALID_PRODUCTS = {
+  // Rock & Gravel
+  'decomposed-granite': ['decomposed granite', 'dg', '1/4 minus', 'quarter minus', 'qm', 'crushed granite'],
+  'granite-base': ['granite base', 'base granite', 'road base granite'],
+  'limestone-1': ['1 limestone', '1" limestone', '1 inch limestone', 'one inch limestone'],
+  'limestone-3/4': ['3/4 limestone', '3/4" limestone', 'three quarter limestone'],
+  'limestone-3/8': ['3/8 limestone', '3/8" limestone', 'three eighth limestone'],
+  'limestone-base': ['limestone base', 'base limestone', 'road base'],
+  'bull-rock-3x5': ['bull rock', '3x5 bull', '3x5 rock', 'bull rock 3x5'],
+  'gravel-2x3': ['2x3 gravel', '2x3', 'two by three'],
+  'gravel-1.5-minus': ['1.5 minus', '1-1/2 minus', 'inch and half minus'],
+  'pea-gravel': ['pea gravel', 'pea rock', '3/8 pea'],
+  'rainbow-gravel': ['rainbow gravel', 'rainbow rock', 'colored gravel'],
+  'blackstar': ['black star', 'blackstar', '5/8 black'],
+  'colorado-bull-rock': ['colorado bull', '1x3 colorado', 'colorado rock'],
+  'fairland-pink': ['fairland pink', 'fairland', 'pink rock', '1x2 fairland'],
+  // Soil & Sand
+  'bank-sand': ['bank sand', 'fill sand', 'common sand'],
+  'select-fill': ['select fill', 'select', 'fill dirt'],
+  'topsoil': ['topsoil', 'top soil', 'garden soil', 'black dirt'],
+  'torpedo-sand': ['torpedo sand', 'torpedo', 'concrete sand'],
+  'mason-sand': ['mason sand', 'masonry sand', 'mortar sand', 'plaster sand'],
+  // Mulch
+  'mulch-black': ['black mulch', 'dyed black', 'black hardwood'],
+  'mulch-brown': ['brown mulch', 'hardwood mulch', 'brown hardwood', 'natural mulch']
+};
+
+// Find best matching productId
+function matchProductId(materialName) {
+  if (!materialName) return { productId: null, confidence: 0 };
+  
+  const normalizedName = materialName.toLowerCase().trim();
+  
+  // Direct match check
+  if (VALID_PRODUCTS[normalizedName]) {
+    return { productId: normalizedName, confidence: 1.0 };
+  }
+  
+  // Check aliases
+  let bestMatch = null;
+  let bestScore = 0;
+  
+  for (const [productId, aliases] of Object.entries(VALID_PRODUCTS)) {
+    for (const alias of aliases) {
+      // Check if alias is contained in material name or vice versa
+      if (normalizedName.includes(alias) || alias.includes(normalizedName)) {
+        const score = alias.length / Math.max(normalizedName.length, alias.length);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = productId;
+        }
+      }
+      
+      // Word-by-word matching
+      const aliasWords = alias.split(' ');
+      const nameWords = normalizedName.split(' ');
+      let matchedWords = 0;
+      for (const word of aliasWords) {
+        if (nameWords.some(w => w.includes(word) || word.includes(w))) {
+          matchedWords++;
+        }
+      }
+      const wordScore = matchedWords / aliasWords.length;
+      if (wordScore > bestScore) {
+        bestScore = wordScore;
+        bestMatch = productId;
+      }
+    }
+  }
+  
+  return {
+    productId: bestMatch,
+    confidence: bestScore
+  };
+}
 
 exports.handler = async (event) => {
   const headers = {
@@ -56,23 +134,24 @@ exports.handler = async (event) => {
               },
               {
                 type: 'text',
-                text: `You are analyzing a material delivery ticket/scale ticket image. Extract the following information and return ONLY a valid JSON object with these exact fields:
+                text: `You are analyzing a material delivery ticket/scale ticket image for a landscaping materials company.
+
+Extract the following information and return ONLY a valid JSON object:
 
 {
-  "vendor": "Company name from the ticket header (e.g., Liberty Materials Inc., Collier Materials, etc.)",
-  "material": "Product/material type (e.g., Masonry Sand #2, QM-1/4 Minus, Limestone, etc.)",
+  "vendor": "Company name from the ticket header (e.g., Liberty Materials Inc., Collier Materials, Martin Marietta, Vulcan, etc.)",
+  "material": "Product/material type exactly as written on ticket (e.g., Masonry Sand #2, QM-1/4 Minus, 3x5 Bull Rock, Decomposed Granite, etc.)",
   "ticketNumber": "The ticket number/ID",
-  "weight": "NET weight in tons as a number (not gross, not tare - the NET weight)",
-  "truck": "Truck ID or number",
+  "weight": "NET weight in tons as a number (not gross, not tare - the NET weight). If given in pounds, divide by 2000.",
+  "truck": "Truck ID or number (look for fields like Truck, Vehicle, Unit #)",
   "date": "Date in YYYY-MM-DD format"
 }
 
-Important notes:
-- For weight, always use the NET weight (Gross minus Tare), converted to tons if given in pounds (divide by 2000)
-- If the weight is already in tons, use that number directly
-- Look for fields labeled "Net", "Net Weight", "Net Tons", etc.
-- Return ONLY the JSON object, no other text or explanation
-- If a field cannot be determined, use an empty string ""`
+Important:
+- For weight, ALWAYS use the NET weight (Gross minus Tare)
+- If weight is in pounds, convert to tons (divide by 2000)
+- Return ONLY the JSON object, no other text
+- If a field cannot be determined, use empty string ""`
               }
             ]
           }
@@ -96,7 +175,6 @@ Important notes:
     // Parse the JSON from Claude's response
     let extractedData;
     try {
-      // Try to extract JSON from the response (in case there's extra text)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         extractedData = JSON.parse(jsonMatch[0]);
@@ -112,14 +190,21 @@ Important notes:
       };
     }
 
-    // Validate and clean the data
+    // Match the material to a productId
+    const materialMatch = matchProductId(extractedData.material);
+
+    // Clean and return the data
     const cleanedData = {
       vendor: extractedData.vendor || '',
       material: extractedData.material || '',
       ticketNumber: extractedData.ticketNumber || '',
       weight: parseFloat(extractedData.weight) || 0,
       truck: extractedData.truck || '',
-      date: extractedData.date || new Date().toISOString().split('T')[0]
+      date: extractedData.date || new Date().toISOString().split('T')[0],
+      // Product matching
+      productId: materialMatch.productId,
+      matchConfidence: materialMatch.confidence,
+      needsReview: materialMatch.confidence < 0.6
     };
 
     return {

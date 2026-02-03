@@ -281,21 +281,31 @@
                         <select class="form-select" id="saleMaterial" onchange="updateSalePrice()">
                             <option value="">-- Select Material --</option>
                             <optgroup label="Rock &amp; Gravel">
-                                <option value="decomposed-granite" data-price="48" data-weight="1.4">Decomposed Granite - $48/ton</option>
+                                <option value="decomposed-granite" data-price="48" data-weight="1.4">1/4" Minus Decomposed Granite - $48/ton</option>
                                 <option value="granite-base" data-price="39" data-weight="1.4">Granite Base - $39/ton</option>
                                 <option value="limestone-1" data-price="55" data-weight="1.4">1" Limestone - $55/ton</option>
-                                <option value="bull-rock-3x5" data-price="41" data-weight="1.4">3x5 Bull Rock - $41/ton</option>
-                                <option value="pea-gravel" data-price="41" data-weight="1.4">Pea Gravel - $41/ton</option>
+                                <option value="limestone-3/4" data-price="55" data-weight="1.4">3/4" Limestone - $55/ton</option>
+                                <option value="limestone-3/8" data-price="55" data-weight="1.4">3/8" Limestone - $55/ton</option>
+                                <option value="limestone-base" data-price="55" data-weight="1.4">Limestone Base - $55/ton</option>
+                                <option value="bull-rock-3x5" data-price="41" data-weight="1.4">3x5 Bull Rock Gravel - $41/ton</option>
+                                <option value="gravel-2x3" data-price="41" data-weight="1.4">2x3 Gravel - $41/ton</option>
+                                <option value="gravel-1.5-minus" data-price="41" data-weight="1.4">1.5" Minus Gravel - $41/ton</option>
+                                <option value="pea-gravel" data-price="41" data-weight="1.4">3/8" Pea Gravel - $41/ton</option>
+                                <option value="rainbow-gravel" data-price="46" data-weight="1.4">Rainbow Gravel - $46/ton</option>
                                 <option value="blackstar" data-price="96" data-weight="1.4">5/8" Black Star - $96/ton</option>
+                                <option value="colorado-bull-rock" data-price="71" data-weight="1.4">1x3 Colorado Bull Rock - $71/ton</option>
+                                <option value="fairland-pink" data-price="45" data-weight="1.4">1x2 Fairland Pink - $45/ton</option>
                             </optgroup>
                             <optgroup label="Soil &amp; Sand">
                                 <option value="bank-sand" data-price="12" data-weight="1.4">Bank Sand - $12/ton</option>
+                                <option value="select-fill" data-price="12" data-weight="1.4">Select Fill - $12/ton</option>
                                 <option value="topsoil" data-price="24" data-weight="1.4">Topsoil - $24/ton</option>
+                                <option value="torpedo-sand" data-price="32" data-weight="1.4">Torpedo Sand - $32/ton</option>
                                 <option value="mason-sand" data-price="21" data-weight="1.4">Mason Sand - $21/ton</option>
                             </optgroup>
                             <optgroup label="Mulch">
                                 <option value="mulch-black" data-price="25" data-weight="0.5">Black Mulch - $25/ton</option>
-                                <option value="mulch-brown" data-price="25" data-weight="0.5">Brown Mulch - $25/ton</option>
+                                <option value="mulch-brown" data-price="25" data-weight="0.5">Brown Hardwood Mulch - $25/ton</option>
                             </optgroup>
                         </select>
                     </div>
@@ -371,10 +381,46 @@
         <div class="extracted-data">
             <div class="data-row"><span class="data-label">Vendor</span><input type="text" class="data-input" id="extractedVendor"></div>
             <div class="data-row"><span class="data-label">Material</span><input type="text" class="data-input" id="extractedMaterial"></div>
+            <div class="data-row">
+                <span class="data-label">Product Match</span>
+                <select class="data-input" id="extractedProductId" style="padding: 8px;">
+                    <option value="">-- Select Product --</option>
+                    <optgroup label="Rock & Gravel">
+                        <option value="decomposed-granite">Decomposed Granite</option>
+                        <option value="granite-base">Granite Base</option>
+                        <option value="limestone-1">1" Limestone</option>
+                        <option value="limestone-3/4">3/4" Limestone</option>
+                        <option value="limestone-3/8">3/8" Limestone</option>
+                        <option value="limestone-base">Limestone Base</option>
+                        <option value="bull-rock-3x5">3x5 Bull Rock</option>
+                        <option value="gravel-2x3">2x3 Gravel</option>
+                        <option value="gravel-1.5-minus">1.5" Minus Gravel</option>
+                        <option value="pea-gravel">Pea Gravel</option>
+                        <option value="rainbow-gravel">Rainbow Gravel</option>
+                        <option value="blackstar">Black Star</option>
+                        <option value="colorado-bull-rock">Colorado Bull Rock</option>
+                        <option value="fairland-pink">Fairland Pink</option>
+                    </optgroup>
+                    <optgroup label="Soil & Sand">
+                        <option value="bank-sand">Bank Sand</option>
+                        <option value="select-fill">Select Fill</option>
+                        <option value="topsoil">Topsoil</option>
+                        <option value="torpedo-sand">Torpedo Sand</option>
+                        <option value="mason-sand">Mason Sand</option>
+                    </optgroup>
+                    <optgroup label="Mulch">
+                        <option value="mulch-black">Black Mulch</option>
+                        <option value="mulch-brown">Brown Mulch</option>
+                    </optgroup>
+                </select>
+            </div>
             <div class="data-row"><span class="data-label">Ticket #</span><input type="text" class="data-input" id="extractedTicket"></div>
             <div class="data-row"><span class="data-label">Weight (tons)</span><input type="number" step="0.01" class="data-input" id="extractedWeight"></div>
             <div class="data-row"><span class="data-label">Truck ID</span><input type="text" class="data-input" id="extractedTruck"></div>
             <div class="data-row"><span class="data-label">Date</span><input type="date" class="data-input" id="extractedDate"></div>
+        </div>
+        <div id="matchWarning" style="display: none; background: #ffc857; color: #1a1a1a; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center; font-size: 14px;">
+            ⚠️ Low confidence match - please verify product selection
         </div>
         <div class="action-buttons">
             <button class="btn btn-secondary" onclick="backToCamera()">Retake</button>
@@ -620,6 +666,25 @@
                     document.getElementById('extractedWeight').value = result.data.weight || '';
                     document.getElementById('extractedTruck').value = result.data.truck || '';
                     document.getElementById('extractedDate').value = result.data.date || new Date().toISOString().split('T')[0];
+                    
+                    // Set productId from AI matching
+                    const productSelect = document.getElementById('extractedProductId');
+                    const matchWarning = document.getElementById('matchWarning');
+                    
+                    if (result.data.productId) {
+                        productSelect.value = result.data.productId;
+                        
+                        // Show warning if low confidence
+                        if (result.data.needsReview || result.data.matchConfidence < 0.6) {
+                            matchWarning.style.display = 'block';
+                        } else {
+                            matchWarning.style.display = 'none';
+                        }
+                    } else {
+                        productSelect.value = '';
+                        matchWarning.style.display = 'block';
+                        matchWarning.textContent = '⚠️ Could not auto-match product - please select manually';
+                    }
                 } else {
                     throw new Error(result.error || 'Failed to extract data');
                 }
@@ -629,10 +694,12 @@
                 // Set defaults
                 document.getElementById('extractedVendor').value = '';
                 document.getElementById('extractedMaterial').value = '';
+                document.getElementById('extractedProductId').value = '';
                 document.getElementById('extractedTicket').value = '';
                 document.getElementById('extractedWeight').value = '';
                 document.getElementById('extractedTruck').value = '';
                 document.getElementById('extractedDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('matchWarning').style.display = 'none';
             }
             
             hideProcessing();
@@ -640,17 +707,53 @@
 
         function backToCamera() { openCamera(); }
 
-        function confirmTicket() {
+        async function confirmTicket() {
             const ticket = {
-                id: Date.now(), vendor: document.getElementById('extractedVendor').value,
-                material: document.getElementById('extractedMaterial').value, ticketNumber: document.getElementById('extractedTicket').value,
-                weight: document.getElementById('extractedWeight').value, truck: document.getElementById('extractedTruck').value,
-                date: document.getElementById('extractedDate').value, capturedBy: currentUser.name, capturedAt: new Date().toISOString()
+                id: Date.now(), 
+                vendor: document.getElementById('extractedVendor').value,
+                material: document.getElementById('extractedMaterial').value, 
+                ticketNumber: document.getElementById('extractedTicket').value,
+                weight: parseFloat(document.getElementById('extractedWeight').value) || 0, 
+                truck: document.getElementById('extractedTruck').value,
+                date: document.getElementById('extractedDate').value, 
+                productId: document.getElementById('extractedProductId')?.value || null,
+                capturedBy: currentUser.name, 
+                capturedAt: new Date().toISOString()
             };
+            
+            // Save locally first
             todayTickets.unshift(ticket);
             localStorage.setItem('ytp_tickets_' + getDateKey(), JSON.stringify(todayTickets));
-            updateTicketStats(); renderTicketList();
-            showToast('Ticket saved successfully!');
+            updateTicketStats(); 
+            renderTicketList();
+            
+            // Update inventory if we have a productId and weight
+            if (ticket.productId && ticket.weight > 0) {
+                try {
+                    const response = await fetch('/.netlify/functions/inventory-update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'increase',
+                            productId: ticket.productId,
+                            tons: ticket.weight,
+                            ticketData: ticket
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast(`Ticket saved! Inventory +${ticket.weight} tons`);
+                    } else {
+                        showToast('Ticket saved (inventory sync pending)', true);
+                    }
+                } catch (err) {
+                    console.error('Inventory update error:', err);
+                    showToast('Ticket saved locally (offline mode)');
+                }
+            } else {
+                showToast('Ticket saved successfully!');
+            }
+            
             showScreen('homeScreen');
         }
 
@@ -770,19 +873,65 @@
             showProcessing('Processing payment...');
 
             try {
+                let paymentResult = null;
+                
                 if (paymentMethod === 'card' && squareCard) {
                     const result = await squareCard.tokenize();
                     if (result.status === 'OK') {
-                        currentSale.payment = { method: 'card', token: result.token, status: 'completed' };
-                    } else { throw new Error(result.errors?.[0]?.message || 'Card error'); }
-                } else { currentSale.payment = { method: paymentMethod, status: 'completed' }; }
-
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                        // Call the create-payment function
+                        const paymentResponse = await fetch('/.netlify/functions/create-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sourceId: result.token,
+                                amount: currentSale.total,
+                                customer: currentSale.customer,
+                                salesperson: currentSale.salesperson,
+                                items: [{ material: currentSale.material, quantity: currentSale.quantity, tons: currentSale.tons }],
+                                orderType: 'yard_sale'
+                            })
+                        });
+                        paymentResult = await paymentResponse.json();
+                        
+                        if (!paymentResult.success) {
+                            throw new Error(paymentResult.error || 'Payment failed');
+                        }
+                        
+                        currentSale.payment = { 
+                            method: 'card', 
+                            paymentId: paymentResult.paymentId,
+                            receiptUrl: paymentResult.receiptUrl,
+                            status: 'completed' 
+                        };
+                    } else { 
+                        throw new Error(result.errors?.[0]?.message || 'Card error'); 
+                    }
+                } else { 
+                    currentSale.payment = { method: paymentMethod, status: 'completed' }; 
+                }
 
                 currentSale.id = Date.now();
                 currentSale.paymentMethod = paymentMethod === 'card' ? 'Card' : 'Apple Pay';
                 currentSale.createdAt = new Date().toISOString();
 
+                // Deplete inventory
+                try {
+                    await fetch('/.netlify/functions/inventory-update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'decrease',
+                            productId: currentSale.materialId,
+                            tons: currentSale.tons,
+                            saleData: currentSale
+                        })
+                    });
+                    console.log('Inventory depleted:', currentSale.materialId, '-', currentSale.tons, 'tons');
+                } catch (invErr) {
+                    console.error('Inventory depletion error:', invErr);
+                }
+
+                // Save locally
                 todaySales.unshift(currentSale);
                 localStorage.setItem('ytp_sales_' + getDateKey(), JSON.stringify(todaySales));
 
@@ -791,7 +940,10 @@
                 resetSaleForm();
                 updateSalesStats(); renderSalesList();
                 showScreen('homeScreen'); switchTab('sales');
-            } catch (err) { hideProcessing(); showToast(err.message || 'Payment failed', true); }
+            } catch (err) { 
+                hideProcessing(); 
+                showToast(err.message || 'Payment failed', true); 
+            }
         }
 
         function resetSaleForm() {
