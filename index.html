@@ -8,6 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>YardTrackPro | T&C Materials</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
     <style>
@@ -24,7 +27,8 @@
         .login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%); }
         .login-screen.active { display: flex; }
         .logo-container { text-align: center; margin-bottom: 48px; }
-        .logo { width: 80px; height: 80px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 32px rgba(106, 191, 75, 0.3); }
+        .logo { width: 80px; height: 80px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 8px 32px rgba(106, 191, 75, 0.3); overflow: hidden; }
+        .logo img { width: 100%; height: 100%; object-fit: cover; }
         .logo svg { width: 44px; height: 44px; fill: var(--bg-primary); }
         .logo-text { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
         .logo-subtext { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
@@ -108,6 +112,20 @@
         .payment-check svg { width: 14px; height: 14px; fill: var(--bg-primary); opacity: 0; }
         .payment-option.selected .payment-check svg { opacity: 1; }
         .card-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; min-height: 50px; margin-top: 16px; }
+        /* Area Calculator Styles */
+        .calculator-section { background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .calc-input-group { display: flex; flex-direction: column; }
+        .calc-input-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        .calc-input-group input { padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 16px; font-family: 'JetBrains Mono', monospace; text-align: center; }
+        .calc-input-group input:focus { outline: none; border-color: var(--accent); }
+        .calc-btn { width: 100%; padding: 14px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 10px; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+        .calc-btn:active { background: var(--accent); color: var(--bg-primary); }
+        .calc-result { display: none; background: linear-gradient(135deg, var(--accent) 0%, #4a9f2e 100%); border-radius: 10px; padding: 16px; margin-top: 12px; text-align: center; }
+        .calc-result.show { display: block; }
+        .calc-result-label { font-size: 12px; color: rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+        .calc-result-value { font-size: 28px; font-weight: 700; color: var(--bg-primary); font-family: 'JetBrains Mono', monospace; }
+        .calc-result-action { margin-top: 10px; font-size: 13px; color: rgba(0,0,0,0.7); }
         .camera-screen { padding: 0; background: #000; position: relative; }
         .camera-header { position: absolute; top: 0; left: 0; right: 0; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 10; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); }
         .back-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); }
@@ -162,7 +180,7 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="screen login-screen active">
         <div class="logo-container">
-            <div class="logo"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+            <div class="logo"><img src="logo.jpg" alt="YardTrackPro"></div>
             <div class="logo-text">YardTrackPro</div>
             <div class="logo-subtext">T&amp;C Materials</div>
         </div>
@@ -226,6 +244,33 @@
                 <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="salesRevenue">$0</div></div>
             </div>
             <div class="sales-form">
+                <!-- Area Calculator -->
+                <div class="form-section">
+                    <div class="form-section-title">📐 Area Calculator</div>
+                    <div class="calculator-section">
+                        <div class="calc-grid">
+                            <div class="calc-input-group">
+                                <label>Length (ft)</label>
+                                <input type="number" id="calcLength" placeholder="0" min="0" step="0.5">
+                            </div>
+                            <div class="calc-input-group">
+                                <label>Width (ft)</label>
+                                <input type="number" id="calcWidth" placeholder="0" min="0" step="0.5">
+                            </div>
+                            <div class="calc-input-group">
+                                <label>Depth (in)</label>
+                                <input type="number" id="calcDepth" placeholder="0" min="0" step="0.5">
+                            </div>
+                        </div>
+                        <button class="calc-btn" onclick="calculateYards()">Calculate</button>
+                        <div class="calc-result" id="calcResult">
+                            <div class="calc-result-label">You need approximately</div>
+                            <div class="calc-result-value"><span id="calcYards">0</span> cubic yards</div>
+                            <div class="calc-result-action">✓ Quantity updated below</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Material Selection -->
                 <div class="form-section">
                     <div class="form-section-title">📦 Material</div>
                     <div class="form-group">
@@ -487,6 +532,34 @@
             list.innerHTML = todaySales.map(s => '<div class="sale-item"><div class="sale-info"><h4>' + (s.customer?.name || 'Walk-in') + '</h4><div class="sale-meta">' + s.material + ' • ' + s.quantity + ' yds • ' + s.salesperson + '</div></div><div class="sale-total"><div class="value">$' + parseFloat(s.total).toFixed(0) + '</div><div class="unit">' + s.paymentMethod + '</div></div></div>').join('');
         }
 
+        // AREA CALCULATOR
+        function calculateYards() {
+            const length = parseFloat(document.getElementById('calcLength').value) || 0;
+            const width = parseFloat(document.getElementById('calcWidth').value) || 0;
+            const depthInches = parseFloat(document.getElementById('calcDepth').value) || 0;
+            
+            if (length <= 0 || width <= 0 || depthInches <= 0) {
+                showToast('Please enter length, width, and depth', true);
+                return;
+            }
+            
+            // Calculate cubic yards: (L × W × D in inches) / 46656 cubic inches per cubic yard
+            // Or: (L × W in sqft) × (D in inches / 12) / 27 cubic feet per cubic yard
+            const depthFeet = depthInches / 12;
+            const cubicFeet = length * width * depthFeet;
+            const cubicYards = cubicFeet / 27;
+            
+            // Round up to nearest 0.5 yard
+            const roundedYards = Math.ceil(cubicYards * 2) / 2;
+            
+            document.getElementById('calcYards').textContent = roundedYards.toFixed(1);
+            document.getElementById('calcResult').classList.add('show');
+            
+            // Update the quantity field
+            document.getElementById('saleQuantity').value = roundedYards;
+            updateSalePrice();
+        }
+
         // CAMERA
         async function openCamera() {
             showScreen('cameraScreen');
@@ -514,14 +587,39 @@
         }
 
         async function extractTicketData() {
-            showProcessing('Analyzing ticket...');
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            document.getElementById('extractedVendor').value = 'Collier Materials';
-            document.getElementById('extractedMaterial').value = 'QM-1/4 Minus';
-            document.getElementById('extractedTicket').value = '415' + Math.floor(Math.random() * 9000 + 1000);
-            document.getElementById('extractedWeight').value = (Math.random() * 20 + 10).toFixed(2);
-            document.getElementById('extractedTruck').value = 'TC00' + Math.floor(Math.random() * 9 + 1);
-            document.getElementById('extractedDate').value = new Date().toISOString().split('T')[0];
+            showProcessing('Analyzing ticket with AI...');
+            
+            try {
+                const response = await fetch('/.netlify/functions/extract-ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: capturedImageData })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    document.getElementById('extractedVendor').value = result.data.vendor || '';
+                    document.getElementById('extractedMaterial').value = result.data.material || '';
+                    document.getElementById('extractedTicket').value = result.data.ticketNumber || '';
+                    document.getElementById('extractedWeight').value = result.data.weight || '';
+                    document.getElementById('extractedTruck').value = result.data.truck || '';
+                    document.getElementById('extractedDate').value = result.data.date || new Date().toISOString().split('T')[0];
+                } else {
+                    throw new Error(result.error || 'Failed to extract data');
+                }
+            } catch (err) {
+                console.error('OCR Error:', err);
+                showToast('Could not read ticket. Please enter manually.', true);
+                // Set defaults
+                document.getElementById('extractedVendor').value = '';
+                document.getElementById('extractedMaterial').value = '';
+                document.getElementById('extractedTicket').value = '';
+                document.getElementById('extractedWeight').value = '';
+                document.getElementById('extractedTruck').value = '';
+                document.getElementById('extractedDate').value = new Date().toISOString().split('T')[0];
+            }
+            
             hideProcessing();
         }
 
@@ -683,6 +781,10 @@
             document.getElementById('salesperson').value = currentUser?.name || '';
             document.getElementById('priceDisplay').style.display = 'none';
             document.getElementById('checkoutBtn').disabled = true;
+            document.getElementById('calcResult').classList.remove('show');
+            document.getElementById('calcLength').value = '';
+            document.getElementById('calcWidth').value = '';
+            document.getElementById('calcDepth').value = '';
             currentSale = null;
         }
 
