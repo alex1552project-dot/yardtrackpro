@@ -134,22 +134,25 @@ exports.handler = async (event) => {
               },
               {
                 type: 'text',
-                text: `You are analyzing a material delivery ticket/scale ticket image for a landscaping materials company.
+                text: `You are analyzing a material delivery ticket/scale ticket image for a Texas landscaping materials company.
 
 Extract the following information and return ONLY a valid JSON object:
 
 {
-  "vendor": "Company name from the ticket header (e.g., Liberty Materials Inc., Collier Materials, Martin Marietta, Vulcan, etc.)",
-  "material": "Product/material type exactly as written on ticket (e.g., Masonry Sand #2, QM-1/4 Minus, 3x5 Bull Rock, Decomposed Granite, etc.)",
+  "vendor": "Company name from the ticket header (e.g., Vulcan Materials, Liberty Materials Inc., Collier Materials, Martin Marietta, etc.)",
+  "material": "Product/material type exactly as written on ticket (e.g., BASE A-2, Masonry Sand #2, QM-1/4 Minus, 3x5 Bull Rock, Decomposed Granite, etc.)",
   "ticketNumber": "The ticket number/ID",
-  "weight": "NET weight in tons as a number (not gross, not tare - the NET weight). If given in pounds, divide by 2000.",
-  "truck": "Truck ID or number (look for fields like Truck, Vehicle, Unit #)",
+  "weight": "NET weight in US SHORT TONS - IMPORTANT: Many tickets show BOTH metric (MG/MT) and US columns. ALWAYS use the US column, NOT the metric column. Look for 'NET' row and 'US' or 'SH TN' column. Typical loads are 10-25 US tons.",
+  "truck": "Truck ID or number (look for fields like Truck, Vehicle, Unit #, or codes like TC003)",
   "date": "Date in YYYY-MM-DD format"
 }
 
-Important:
-- For weight, ALWAYS use the NET weight (Gross minus Tare)
-- If weight is in pounds, convert to tons (divide by 2000)
+CRITICAL for weight:
+- Find the NET row (Gross minus Tare)
+- Use the US TONS column, NOT metric (MG/MT) column
+- US tons column often labeled 'US', 'SH TN', 'SHORT TONS'
+- Metric column often labeled 'MG', 'MT', 'METRIC'
+- If only one weight shown and in pounds, divide by 2000
 - Return ONLY the JSON object, no other text
 - If a field cannot be determined, use empty string ""`
               }

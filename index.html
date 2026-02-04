@@ -629,16 +629,17 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Show processing screen
+            // Show processing screen immediately
             showScreen('photoProcessingScreen');
             document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoStatus').style.display = 'block';
 
             // Convert to base64
             const reader = new FileReader();
             reader.onload = async function(e) {
                 capturedImageData = e.target.result;
                 
-                // Show preview
+                // Show preview while processing
                 document.getElementById('photoPreview').src = capturedImageData;
                 document.getElementById('photoPreview').style.display = 'block';
 
