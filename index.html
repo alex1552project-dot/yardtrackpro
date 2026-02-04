@@ -39,10 +39,10 @@
         .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(106, 191, 75, 0.5); }
         .pin-dot.error { background: var(--danger); border-color: var(--danger); animation: shake 0.4s ease; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 280px; }
-        .key { width: 72px; height: 72px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); font-size: 28px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 340px; }
+        .key { width: 100px; height: 100px; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); font-size: 36px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
         .key:active { transform: scale(0.95); background: var(--accent-dim); border-color: var(--accent); }
-        .key.delete { font-size: 20px; }
+        .key.delete { font-size: 28px; }
         .key.empty { visibility: hidden; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .user-info { display: flex; align-items: center; gap: 12px; }
@@ -67,6 +67,8 @@
         .action-button:disabled { opacity: 0.5; cursor: not-allowed; }
         .action-button svg { width: 24px; height: 24px; fill: currentColor; }
         .recent-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-secondary); }
+        .date-header { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .date-header:first-child { margin-top: 0; }
         .ticket-list, .sales-list { display: flex; flex-direction: column; gap: 12px; }
         .ticket-item, .sale-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
         .ticket-info h4, .sale-info h4 { font-weight: 600; margin-bottom: 4px; }
@@ -566,7 +568,39 @@
                 list.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><p>No tickets scanned today</p></div>';
                 return;
             }
-            list.innerHTML = todayTickets.map(t => '<div class="ticket-item"><div class="ticket-info"><h4>' + (t.vendor || 'Unknown') + '</h4><div class="ticket-meta">' + (t.material || 'Material') + ' • #' + (t.ticketNumber || '---') + '</div></div><div class="ticket-tons"><div class="value">' + parseFloat(t.weight || 0).toFixed(2) + '</div><div class="unit">tons</div></div></div>').join('');
+            
+            // Group tickets by date
+            const grouped = {};
+            todayTickets.forEach(t => {
+                const ticketDate = t.date || getDateKey();
+                if (!grouped[ticketDate]) grouped[ticketDate] = [];
+                grouped[ticketDate].push(t);
+            });
+            
+            // Format date header
+            function formatDateHeader(dateStr) {
+                const today = getDateKey();
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                
+                if (dateStr === today) return 'Today';
+                if (dateStr === yesterdayStr) return 'Yesterday';
+                
+                const date = new Date(dateStr + 'T12:00:00');
+                return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            }
+            
+            // Render with date headers
+            let html = '';
+            const sortedDates = Object.keys(grouped).sort().reverse();
+            sortedDates.forEach(date => {
+                html += '<div class="date-header">' + formatDateHeader(date) + '</div>';
+                grouped[date].forEach(t => {
+                    html += '<div class="ticket-item"><div class="ticket-info"><h4>' + (t.vendor || 'Unknown') + '</h4><div class="ticket-meta">' + (t.material || 'Material') + ' • #' + (t.ticketNumber || '---') + '</div></div><div class="ticket-tons"><div class="value">' + parseFloat(t.weight || 0).toFixed(2) + '</div><div class="unit">tons</div></div></div>';
+                });
+            });
+            list.innerHTML = html;
         }
 
         function renderSalesList() {
