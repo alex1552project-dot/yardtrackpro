@@ -11,7 +11,7 @@ const VALID_PRODUCTS = {
   'limestone-3/4': ['3/4 limestone', '3/4" limestone', 'three quarter limestone'],
   'limestone-3/8': ['3/8 limestone', '3/8" limestone', 'three eighth limestone'],
   'limestone-base': ['limestone base', 'base limestone', 'road base'],
-  'bull-rock-3x5': ['bull rock', '3x5 bull', '3x5 rock', 'bull rock 3x5'],
+  'bull-rock-3x5': ['bull rock', '3x5 bull', '3x5 rock', 'bull rock 3x5', 'oversize', '3x6', '3x5', 'rip rap', 'riprap', 'oversize - 3x6', 'oversize - 3x5'],
   'gravel-2x3': ['2x3 gravel', '2x3', 'two by three'],
   'gravel-1.5-minus': ['1.5 minus', '1-1/2 minus', 'inch and half minus'],
   'pea-gravel': ['pea gravel', 'pea rock', '3/8 pea'],
