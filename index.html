@@ -335,8 +335,37 @@
                         <div class="form-group"><label class="form-label">Email (optional)</label><input type="email" class="form-input" id="customerEmail" placeholder="john@email.com"></div>
                     </div>
                 </div>
+                <div class="form-section">
+                    <div class="form-section-title">🚛 Delivery</div>
+                    <div class="form-group">
+                        <label class="form-label">Delivery Fee</label>
+                        <select class="form-input" id="deliveryFee" onchange="updateSalePrice()">
+                            <option value="0">No Delivery (Pickup)</option>
+                            <option value="75">$75</option>
+                            <option value="85">$85</option>
+                            <option value="95">$95</option>
+                            <option value="105">$105</option>
+                            <option value="115">$115</option>
+                            <option value="125">$125</option>
+                            <option value="135">$135</option>
+                            <option value="145">$145</option>
+                            <option value="155">$155</option>
+                            <option value="165">$165</option>
+                            <option value="175">$175</option>
+                            <option value="185">$185</option>
+                            <option value="195">$195</option>
+                            <option value="205">$205</option>
+                            <option value="215">$215</option>
+                            <option value="225">$225</option>
+                            <option value="235">$235</option>
+                            <option value="245">$245</option>
+                            <option value="250">$250</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="price-display" id="priceDisplay" style="display: none;">
                     <div class="price-row"><span id="priceQtyLabel">0 yds × $0/ton</span><span class="amount" id="priceSubtotal">$0.00</span></div>
+                    <div class="price-row"><span>Delivery Fee</span><span class="amount" id="priceDelivery">$0.00</span></div>
                     <div class="price-row"><span>Service Fee (3.5%)</span><span class="amount" id="priceServiceFee">$0.00</span></div>
                     <div class="price-row"><span>Sales Tax (8.25%)</span><span class="amount" id="priceTax">$0.00</span></div>
                     <div class="price-row total"><span>Total</span><span class="amount" id="priceTotal">$0.00</span></div>
@@ -915,13 +944,14 @@
 
             const tons = quantity * weightPerYard;
             const subtotal = tons * pricePerTon;
-            const serviceFee = subtotal * 0.035;
-            const taxable = subtotal + serviceFee;
-            const salesTax = taxable * 0.0825;
-            const total = taxable + salesTax;
+            const deliveryFee = parseFloat(document.getElementById('deliveryFee').value) || 0;
+            const serviceFee = (subtotal + deliveryFee) * 0.035;
+            const salesTax = subtotal * 0.0825;
+            const total = subtotal + deliveryFee + serviceFee + salesTax;
 
             document.getElementById('priceQtyLabel').textContent = quantity + ' yds (' + tons.toFixed(2) + ' tons) × $' + pricePerTon + '/ton';
             document.getElementById('priceSubtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('priceDelivery').textContent = deliveryFee > 0 ? '$' + deliveryFee.toFixed(2) : '$0.00';
             document.getElementById('priceServiceFee').textContent = '$' + serviceFee.toFixed(2);
             document.getElementById('priceTax').textContent = '$' + salesTax.toFixed(2);
             document.getElementById('priceTotal').textContent = '$' + total.toFixed(2);
@@ -934,7 +964,7 @@
                 calcTonsEl.textContent = '≈ ' + tons.toFixed(2) + ' tons of ' + materialName;
             }
 
-            currentSale = { materialId: materialSelect.value, material: materialName, quantity, tons, pricePerTon, subtotal, serviceFee, salesTax, total };
+            currentSale = { materialId: materialSelect.value, material: materialName, quantity, tons, pricePerTon, subtotal, deliveryFee, serviceFee, salesTax, total };
             validateSaleForm();
         }
 
@@ -978,6 +1008,7 @@
 
             document.getElementById('checkoutSummary').innerHTML = 
                 '<div class="order-item"><div><div class="order-item-name">' + currentSale.material + '</div><div class="order-item-detail">' + currentSale.quantity + ' yards (' + currentSale.tons.toFixed(2) + ' tons)</div></div><div class="order-item-price">$' + currentSale.subtotal.toFixed(2) + '</div></div>' +
+                (currentSale.deliveryFee > 0 ? '<div class="order-item"><div><div class="order-item-detail">Delivery Fee</div></div><div class="order-item-price">$' + currentSale.deliveryFee.toFixed(2) + '</div></div>' : '') +
                 '<div class="order-item"><div><div class="order-item-detail">Service Fee (3.5%)</div></div><div class="order-item-price">$' + currentSale.serviceFee.toFixed(2) + '</div></div>' +
                 '<div class="order-item"><div><div class="order-item-detail">Sales Tax (8.25%)</div></div><div class="order-item-price">$' + currentSale.salesTax.toFixed(2) + '</div></div>' +
                 '<div class="order-item" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 8px;"><div><div class="order-item-name">Customer</div><div class="order-item-detail">' + currentSale.customer.name + ' • ' + currentSale.customer.phone + '</div></div></div>' +
