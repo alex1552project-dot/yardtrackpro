@@ -82,10 +82,31 @@ exports.handler = async (event) => {
 
     } else if (action === 'decrease') {
       // YARD SALE - Deplete inventory
+
+      // NEW: Check stock availability before depleting
+      const inventoryRecord = await db.collection('inventory').findOne({ productId });
+      const currentStock = inventoryRecord?.currentStock || 0;
+      const requestedTons = parseFloat(tons);
+
+      if (currentStock < requestedTons) {
+        console.log(`Insufficient stock: ${productId} has ${currentStock} tons, requested ${requestedTons}`);
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            success: false,
+            error: 'Insufficient inventory',
+            available: Math.round(currentStock * 10) / 10,
+            requested: requestedTons,
+            message: `Only ${Math.round(currentStock * 10) / 10} tons of ${productId} available. Cannot sell ${requestedTons} tons.`
+          })
+        };
+      }
+
       const result = await db.collection('inventory').updateOne(
         { productId },
         { 
-          $inc: { currentStock: -parseFloat(tons) },
+          $inc: { currentStock: -requestedTons },
           $set: { updatedAt: new Date() }
         }
       );
@@ -93,7 +114,7 @@ exports.handler = async (event) => {
       // Log the yard sale
       await db.collection('yard_sales').insertOne({
         productId,
-        tons: parseFloat(tons),
+        tons: requestedTons,
         material: saleData?.material || productId,
         quantity: saleData?.quantity || 0,
         subtotal: saleData?.subtotal || 0,
@@ -108,7 +129,7 @@ exports.handler = async (event) => {
         source: 'yardtrackpro'
       });
 
-      console.log(`Inventory DECREASED: ${productId} -${tons} tons`);
+      console.log(`Inventory DECREASED: ${productId} -${requestedTons} tons (was ${currentStock}, now ${currentStock - requestedTons})`);
 
       return {
         statusCode: 200,
@@ -117,8 +138,10 @@ exports.handler = async (event) => {
           success: true,
           action: 'decrease',
           productId,
-          tons,
-          message: `Removed ${tons} tons from ${productId}`
+          tons: requestedTons,
+          previousStock: currentStock,
+          newStock: Math.round((currentStock - requestedTons) * 10) / 10,
+          message: `Removed ${requestedTons} tons from ${productId}`
         })
       };
 

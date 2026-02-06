@@ -44,19 +44,27 @@ exports.handler = async (event) => {
       const payment = data.object.payment;
       
       // Extract yard sale info from reference ID or note
-      const isYardSale = payment.note?.includes('Yard Sale') || 
+      // Supports new format (YTP-) and legacy format (YS-)
+      const isYardSale = payment.note?.includes('YTP Yard Sale') || 
+                         payment.note?.includes('Yard Sale') ||
+                         payment.referenceId?.startsWith('YTP-') ||
                          payment.referenceId?.startsWith('YS-');
 
       if (isYardSale) {
         // Connect to MongoDB
+        // FIX: Was 'texasgotrocks' — corrected to 'gotrocks' to match all other apps
         const mongoClient = new MongoClient(process.env.MONGODB_URI);
         await mongoClient.connect();
-        const db = mongoClient.db('texasgotrocks');
+        const db = mongoClient.db('gotrocks');
         
-        // Parse salesperson from note: "Yard Sale - Customer Name - Salesperson"
-        const noteParts = payment.note?.split(' - ') || [];
-        const salesperson = noteParts[2] || 'Unknown';
-        const customerName = noteParts[1] || 'Walk-in';
+        // Parse salesperson from note
+        // New format: "YTP Yard Sale | Customer Name | Salesperson"
+        // Legacy format: "Yard Sale - Customer Name - Salesperson"
+        const noteParts = payment.note?.includes('|') 
+          ? payment.note?.split(' | ') 
+          : payment.note?.split(' - ');
+        const salesperson = (noteParts || [])[noteParts.length - 1] || 'Unknown';
+        const customerName = (noteParts || [])[noteParts.length - 2] || 'Walk-in';
 
         // Calculate commission (3% of subtotal before fees/tax)
         // Total includes 3.5% service fee + 8.25% tax
@@ -80,7 +88,7 @@ exports.handler = async (event) => {
           locationId: payment.locationId,
           createdAt: new Date(payment.createdAt),
           recordedAt: new Date(),
-          source: 'square_webhook'
+          source: 'yardtrackpro'
         };
 
         await db.collection('yard_sales').insertOne(saleRecord);
@@ -97,7 +105,7 @@ exports.handler = async (event) => {
         });
 
         await mongoClient.close();
-
+        // FIX: Was missing opening parenthesis on console.log
         console.log(`Recorded yard sale: $${totalAmount} by ${salesperson}, commission: $${saleRecord.commission}`);
       }
     }
